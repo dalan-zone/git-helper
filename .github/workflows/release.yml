@@ -99,4 +99,4 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add version.properties gradle.properties
           git commit -m "ci: bump versionCode to ${{ steps.bump.outputs.code }} [skip ci]" || echo "nothing to commit"
-          git push
+          git push origin HEAD:main
