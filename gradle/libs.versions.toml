@@ -1,0 +1,42 @@
+# Single source of truth for all dependency & plugin versions.
+# Reference from build scripts with libs.versions.<key> / libs.<alias>.
+
+[versions]
+agp                  = "8.5.2"      # Android Gradle Plugin
+kotlin               = "1.9.24"
+composeCompiler     = "1.5.14"
+compileSdk           = "34"
+targetSdk            = "34"
+minSdk               = "24"
+
+coreKtx              = "1.13.1"
+lifecycle            = "2.8.2"
+coroutines           = "1.8.1"
+activityCompose      = "1.9.0"
+composeBom           = "2024.08.00"
+
+junit                = "4.13.2"
+androidxJunit        = "1.2.1"
+espresso             = "3.6.1"
+
+[plugins]
+android-application  = { id = "com.android.application", version.ref = "agp" }
+kotlin-android       = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+
+[libraries]
+androidx-core-ktx              = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle" }
+androidx-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycle" }
+kotlinx-coroutines-android     = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
+androidx-activity-compose      = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
+
+# Compose BOM pins all androidx.compose.* versions together.
+androidx-compose-bom    = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+androidx-ui             = { group = "androidx.compose.ui", name = "ui" }
+androidx-ui-tooling     = { group = "androidx.compose.ui", name = "ui-tooling" }
+androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+androidx-material3      = { group = "androidx.compose.material3", name = "material3" }
+
+junit                = { group = "junit", name = "junit", version.ref = "junit" }
+androidx-junit        = { group = "androidx.test.ext", name = "junit", version.ref = "androidxJunit" }
+androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso" }

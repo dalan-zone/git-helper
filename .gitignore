@@ -1,0 +1,21 @@
+# Built artifacts
+*.aab
+*.apk
+/build/
+/app/build/
+.gradle/
+gradle/wrapper/gradle-wrapper.jar
+
+# Local config (SDK path, signing)
+local.properties
+app/release.keystore
+signing.properties
+
+# IDE
+.idea/
+!.idea/codeStyles/
+*.iml
+.DS_Store
+
+# Version control housekeeping
+# version.properties IS tracked on purpose (holds the monotonic versionCode).
