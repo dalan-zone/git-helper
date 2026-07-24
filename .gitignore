@@ -5,7 +5,8 @@
 /app/build/
 /app/prod/
 .gradle/
-gradle/wrapper/gradle-wrapper.jar
+# Keep gradle-wrapper.jar tracked — it is the small bootstrapper required by CI.
+# Only ignore downloaded Gradle distributions under .gradle/.
 
 # Local config (SDK path, signing)
 local.properties
