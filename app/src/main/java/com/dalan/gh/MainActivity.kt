@@ -3,6 +3,7 @@ package com.dalan.gh
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -27,9 +28,11 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun Greeting(baseUrl: String) {
     Surface(color = MaterialTheme.colorScheme.background) {
-        Text(text = "VersionedApp\nAPI: $baseUrl")
-        Text(text = "VersionCode: $appVersionCode")
-        Text(text = "VersionName: $appVersionName")
+        Column() {
+            Text(text = "VersionedApp\nAPI: $baseUrl")
+            Text(text = "VersionCode: $appVersionCode")
+            Text(text = "VersionName: $appVersionName")
+        }
     }
 }
 
