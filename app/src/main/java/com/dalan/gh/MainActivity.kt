@@ -9,6 +9,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.dalan.gh.ui.theme.AppTheme
+import com.dalan.gh.utils.appVersionCode
+import com.dalan.gh.utils.appVersionName
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,6 +28,8 @@ class MainActivity : ComponentActivity() {
 fun Greeting(baseUrl: String) {
     Surface(color = MaterialTheme.colorScheme.background) {
         Text(text = "VersionedApp\nAPI: $baseUrl")
+        Text(text = "VersionCode: $appVersionCode")
+        Text(text = "VersionName: $appVersionName")
     }
 }
 

@@ -7,7 +7,7 @@ kotlin               = "1.9.24"
 composeCompiler     = "1.5.14"
 compileSdk           = "34"
 targetSdk            = "34"
-minSdk               = "24"
+minSdk               = "26"
 
 coreKtx              = "1.13.1"
 lifecycle            = "2.8.2"
