@@ -80,7 +80,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: app-prod-release-apk
-          path: app/build/outputs/apk/prodRelease/*.apk
+          path: app/build/outputs/apk/prod/release/*.apk
 
       # --- Optional: publish to Google Play internal track ---
       # Needs PLAY_SERVICE_ACCOUNT_JSON in secrets.
