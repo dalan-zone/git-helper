@@ -55,15 +55,14 @@ jobs:
         run: |
           sed -i "s/^VERSION_NAME=.*/VERSION_NAME=${VERSION_NAME}/" gradle.properties
 
-      # --- Optional: restore signing keystore from a base64 secret ---
-      # Store KEYSTORE_BASE64 in repo secrets, then uncomment:
-      # - name: Decode signing keystore
-      #   run: |
-      #     echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > app/release.keystore
-      #     echo "KEYSTORE_FILE=$PWD/app/release.keystore" >> "$GITHUB_ENV"
-      #     echo "KEYSTORE_PASSWORD=${{ secrets.KEYSTORE_PASSWORD }}" >> "$GITHUB_ENV"
-      #     echo "KEY_ALIAS=${{ secrets.KEY_ALIAS }}" >> "$GITHUB_ENV"
-      #     echo "KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}" >> "$GITHUB_ENV"
+      # Restore signing keystore from a base64 secret (KEYSTORE_BASE64 must be set in repo secrets)
+      - name: Decode signing keystore
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > app/release.keystore
+          echo "KEYSTORE_FILE=$PWD/app/release.keystore" >> "$GITHUB_ENV"
+          echo "KEYSTORE_PASSWORD=${{ secrets.KEYSTORE_PASSWORD }}" >> "$GITHUB_ENV"
+          echo "KEY_ALIAS=${{ secrets.KEY_ALIAS }}" >> "$GITHUB_ENV"
+          echo "KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}" >> "$GITHUB_ENV"
 
       - name: Build release AAB (prod flavor)
         run: ./gradlew :app:bundleProdRelease -PVERSION_NAME="${VERSION_NAME}"
@@ -89,7 +88,7 @@ jobs:
       #   uses: r0adkll/upload-google-play@v1
       #   with:
       #     serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
-      #     packageName: com.example.app
+      #     packageName: com.dalan.gh
       #     releaseFiles: app/build/outputs/bundle/prodRelease/*.aab
       #     track: internal
       #     status: completed

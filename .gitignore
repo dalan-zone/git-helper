@@ -3,6 +3,7 @@
 *.apk
 /build/
 /app/build/
+/app/prod/
 .gradle/
 gradle/wrapper/gradle-wrapper.jar
 
