@@ -7,11 +7,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.app"
+    namespace = "com.dalan.gh"
     compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
-        applicationId = "com.example.app"
+        applicationId = "com.dalan.gh"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
 

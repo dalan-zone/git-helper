@@ -17,5 +17,8 @@ signing.properties
 *.iml
 .DS_Store
 
+# WorkBuddy
+.workbuddy/
+
 # Version control housekeeping
 # version.properties IS tracked on purpose (holds the monotonic versionCode).
