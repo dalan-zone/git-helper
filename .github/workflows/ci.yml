@@ -5,6 +5,8 @@
 #       让 "合并前 CI 必须通过" 有东西可卡。
 # 注意：发布（打 tag）由 release.yml 负责，这里不做签名/打包。
 # 发布工作流回写的提交带 [skip ci]，会自动跳过本工作流，不会死循环。
+# app 使用 productFlavors (dev/staging/prod)，Gradle 任务名必须带 flavor，
+# 否则 lintDebug/testDebugUnitTest/assembleDebug 会因歧义报错；此处冒烟用 prod。
 # =============================================================================
 
 name: CI
@@ -35,10 +37,10 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Lint
-        run: ./gradlew :app:lintDebug
+        run: ./gradlew :app:lintProdDebug
 
       - name: Unit tests
-        run: ./gradlew :app:testDebugUnitTest
+        run: ./gradlew :app:testProdDebugUnitTest
 
       - name: Assemble debug (smoke)
-        run: ./gradlew :app:assembleDebug
+        run: ./gradlew :app:assembleProdDebug

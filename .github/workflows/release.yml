@@ -25,6 +25,10 @@ on:
 
 jobs:
   release:
+    # 只在打 v* tag 或手动 workflow_dispatch 时发布；普通分支推送不触发，
+    # 避免每次 push 都误跑一次发布流水线（且因缺 tag 上下文而失败）。
+    if: >-
+      github.ref_type == 'tag' || github.event_name == 'workflow_dispatch'
     uses: ./.github/workflows/android-release.yml
     secrets: inherit
     with:
