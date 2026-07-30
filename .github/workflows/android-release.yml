@@ -1,0 +1,192 @@
+# =============================================================================
+# android-release.yml  —  Reusable release workflow for Android projects
+# -----------------------------------------------------------------------------
+# This is the SHARED, project-agnostic release pipeline. Keep it in ONE repo
+# (this one) and let every other Android project call it, so the release logic
+# lives in exactly one place.
+#
+# How a project consumes it (.github/workflows/release.yml in the calling repo):
+#
+#   name: Release
+#   on:
+#     push:
+#       tags: ['v*']
+#     workflow_dispatch:
+#       inputs:
+#         versionName:
+#           description: 'versionName (SemVer), e.g. 1.2.0'
+#           required: true
+#           default: '1.0.0'
+#   jobs:
+#     release:
+#       uses: dalan-zone/git-helper/.github/workflows/android-release.yml@main
+#       secrets: inherit
+#       with:
+#         version-name: >-
+#           ${{ github.ref_type == 'tag' && substring(github.ref_name, 1)
+#               || inputs.versionName }}
+#         # optional overrides:
+#         #   flavor: prod
+#         #   module: :app
+#         #   jdk-version: '17'
+#         #   build-aab: true
+#         #   build-apk: true
+#
+# Required repo secrets in EACH calling project:
+#   KEYSTORE_BASE64, KEYSTORE_PASSWORD, KEY_ALIAS, KEY_PASSWORD
+#   (and PLAY_SERVICE_ACCOUNT_JSON if you uncomment the Play publish step)
+#
+# Conventions expected in the calling project:
+#   - version.properties  with VERSION_CODE=<int>   (monotonic, committed)
+#   - gradle.properties   with VERSION_NAME=<string>
+#   - computeVersionCode() resolves: CI env > version.properties > git commit count
+# =============================================================================
+
+name: Android Release (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      version-name:
+        description: 'versionName, e.g. 1.3.0 (without the leading v)'
+        required: true
+        type: string
+      flavor:
+        description: 'Product flavor to build (lowercase, e.g. prod)'
+        required: false
+        type: string
+        default: 'prod'
+      module:
+        description: 'Gradle module path, e.g. :app'
+        required: false
+        type: string
+        default: ':app'
+      jdk-version:
+        description: 'JDK version'
+        required: false
+        type: string
+        default: '17'
+      build-aab:
+        description: 'Build AAB (for Play Store / internal distribution)'
+        required: false
+        type: boolean
+        default: true
+      build-apk:
+        description: 'Build APK (for direct sideload / QA)'
+        required: false
+        type: boolean
+        default: true
+      commit-version-bump:
+        description: 'Commit the bumped versionCode + versionName back to main'
+        required: false
+        type: boolean
+        default: true
+      package-name:
+        description: 'Application ID, only used if Play publish is enabled'
+        required: false
+        type: string
+        default: ''
+    secrets:
+      KEYSTORE_BASE64:
+        required: true
+      KEYSTORE_PASSWORD:
+        required: true
+      KEY_ALIAS:
+        required: true
+      KEY_PASSWORD:
+        required: true
+      PLAY_SERVICE_ACCOUNT_JSON:
+        required: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # needed to commit the bumped versionCode back
+    env:
+      VERSION_NAME: ${{ inputs.version-name }}
+    steps:
+      - name: Checkout (full history for commit count)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK ${{ inputs.jdk-version }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: ${{ inputs.jdk-version }}
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Bump versionCode
+        id: bump
+        run: |
+          CODE=$(grep -E '^VERSION_CODE=' version.properties | cut -d= -f2)
+          CODE=$((CODE + 1))
+          sed -i "s/^VERSION_CODE=.*/VERSION_CODE=$CODE/" version.properties
+          echo "code=$CODE" >> "$GITHUB_OUTPUT"
+          echo "VERSION_CODE=$CODE" >> "$GITHUB_ENV"
+
+      - name: Sync versionName into gradle.properties
+        run: |
+          sed -i "s/^VERSION_NAME=.*/VERSION_NAME=${VERSION_NAME}/" gradle.properties
+
+      - name: Decode signing keystore
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > app/release.keystore
+          echo "KEYSTORE_FILE=$PWD/app/release.keystore" >> "$GITHUB_ENV"
+          echo "KEYSTORE_PASSWORD=${{ secrets.KEYSTORE_PASSWORD }}" >> "$GITHUB_ENV"
+          echo "KEY_ALIAS=${{ secrets.KEY_ALIAS }}" >> "$GITHUB_ENV"
+          echo "KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}" >> "$GITHUB_ENV"
+
+      - name: Build release AAB (${{ inputs.flavor }} flavor)
+        if: ${{ inputs.build-aab }}
+        run: |
+          flavor="${{ inputs.flavor }}"
+          FLAVOR_CAP="${flavor^}"
+          ./gradlew "${{ inputs.module }}":bundle"${FLAVOR_CAP}"Release -PVERSION_NAME="${VERSION_NAME}"
+
+      - name: Upload AAB artifact
+        if: ${{ inputs.build-aab }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-${{ inputs.flavor }}-release-aab
+          path: app/build/outputs/bundle/${{ inputs.flavor }}Release/*.aab
+
+      - name: Build release APK (${{ inputs.flavor }} flavor)
+        if: ${{ inputs.build-apk }}
+        run: |
+          flavor="${{ inputs.flavor }}"
+          FLAVOR_CAP="${flavor^}"
+          ./gradlew "${{ inputs.module }}":assemble"${FLAVOR_CAP}"Release -PVERSION_NAME="${VERSION_NAME}"
+
+      - name: Upload APK artifact
+        if: ${{ inputs.build-apk }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-${{ inputs.flavor }}-release-apk
+          path: app/build/outputs/apk/${{ inputs.flavor }}/release/*.apk
+
+      # --- Optional: publish to Google Play internal track ---
+      # 1) Set PLAY_SERVICE_ACCOUNT_JSON secret in the calling repo.
+      # 2) Uncomment the block below and pass package-name via `with:`.
+      # - name: Publish to Play Store
+      #   if: ${{ inputs.package-name != '' }}
+      #   uses: r0adkll/upload-google-play@v1
+      #   with:
+      #     serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+      #     packageName: ${{ inputs.package-name }}
+      #     releaseFiles: app/build/outputs/bundle/${{ inputs.flavor }}Release/*.aab
+      #     track: internal
+      #     status: completed
+
+      - name: Commit bumped versionCode
+        if: ${{ inputs.commit-version-bump }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add version.properties gradle.properties
+          git commit -m "ci: bump versionCode to ${{ steps.bump.outputs.code }} [skip ci]" || echo "nothing to commit"
+          git push origin HEAD:main
