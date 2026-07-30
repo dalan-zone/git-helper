@@ -32,6 +32,7 @@ jobs:
     uses: ./.github/workflows/android-release.yml
     secrets: inherit
     with:
+      # 传完整 tag（含 v），v 前缀由 android-release.yml 在 shell 里用 ${RAW#v} 去掉；
+      # GitHub Actions 表达式没有 substring 函数，故不在此处截子串。
       version-name: >-
-        ${{ github.ref_type == 'tag' && substring(github.ref_name, 1)
-            || inputs.versionName }}
+        ${{ github.ref_type == 'tag' && github.ref_name || (inputs.versionName || '0.0.0') }}

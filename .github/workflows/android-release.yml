@@ -23,8 +23,7 @@
 #       secrets: inherit
 #       with:
 #         version-name: >-
-#           ${{ github.ref_type == 'tag' && substring(github.ref_name, 1)
-#               || inputs.versionName }}
+#           ${{ github.ref_type == 'tag' && github.ref_name || (inputs.versionName || '0.0.0') }}
 #         # optional overrides:
 #         #   flavor: prod
 #         #   module: :app
@@ -119,6 +118,11 @@ jobs:
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
+
+      - name: Normalize versionName (strip leading "v")
+        run: |
+          RAW="${{ inputs.version-name }}"
+          echo "VERSION_NAME=${RAW#v}" >> "$GITHUB_ENV"
 
       - name: Bump versionCode
         id: bump
