@@ -223,6 +223,8 @@ git hotfix 1.2.1 v1.2.0     # 从 v1.2.0 切出 hotfix/1.2.1
 
 > 以上 alias 已写入**全局** `~/.gitconfig`（对所有项目生效）。如需移除：`git config --global --unset alias.release` 等。
 
+> 不想依赖 alias 时，等价的原生命令流程见 [`GIT-FLOW.md`](./GIT-FLOW.md)。
+
 ---
 
 ## 11. 日常命令速查

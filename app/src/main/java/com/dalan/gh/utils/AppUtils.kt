@@ -21,7 +21,7 @@ inline val appVersionCode: Long
     }
 
 /**
- * 过去 APP versionName
+ * 获取 APP versionName
  */
 inline val appVersionName: String
     get() = packageInfo.versionName
