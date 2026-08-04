@@ -1,0 +1,17 @@
+# 默认：文本文件统一以 LF 进仓库，检出到工作区也保持 LF
+# 避免 Windows 的 CRLF 污染 gradle/shell 脚本，导致 Linux CI 跑挂
+* text=auto eol=lf
+
+# Windows 批处理必须 CRLF 才能执行
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# 二进制文件：禁止换行符转换，按字节原样处理
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.jar binary
+*.jks binary
+*.keystore binary
+*.zip binary
